@@ -1,0 +1,38 @@
+#!/usr/bin/env dash
+
+FOLDER="$HOME"/.activities/$(activities.id)/started"
+SUMMARY="launching activity applications..."
+MESSAGE=""
+
+if [ ! -d "$FOLDER" ]
+then
+	echo "Folder "$FOLDER" not found!"
+    exit 1
+fi
+
+for x in $FOLDER/*.sh
+do
+    echo looping: $x
+    if [ -x "$x" ]
+    then
+        echo exists: $x
+        if ! systemctl --user list-units | grep $x -s | grep active -q 
+        then
+            echo running: systemd-run --user $x
+            MESSAGE="$MESSAGE \n Running: $(basename $x)"
+            #nohup systemd-run --user --scope $x & #> $FOLDER/$x.log
+            #systemd-run --user --scope $x </dev/null &>/dev/null &
+            systemd-run --user $x
+            sleep 1s
+        else
+            MESSAGE="$MESSAGE \n Skipping: $(basename $x)"
+            echo skipping: systemd-run --user $x
+        fi
+    fi
+done
+echo $MESSAGE
+if [ ! -z "$MESSAGE" ]
+then
+    notify-send "$SUMMARY" "$MESSAGE" 
+fi
+

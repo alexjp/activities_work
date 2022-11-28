@@ -1,0 +1,158 @@
+#!/usr/bin/env dash
+#
+
+if [ $# -gt 0 ]
+then
+  PROFILE="$1"
+else  
+  PROFILE=default-$(activities.id)
+fi
+
+
+firefox -CreateProfile $PROFILE
+
+cd ~/.mozilla/firefox
+fish set_chrome_theme.fish
+
+
+
+#PATH=$(grep $PROFILE ~/.mozilla/firefox/profiles.ini | grep Path | cut -d"=" -f2)
+#echo ~/.mozilla/firefox/"$PATH"/user.js
+#
+#SEARCH="/home/alex/.home/.mozilla/search.json.mozlz4"
+#if [ -e $SEARCH ]
+#then
+#	/usr/bin/cp -v $SEARCH ~/.mozilla/firefox/"$PATH"
+#fi
+##ADDONS="/home/alex/.home/.mozilla/addonStartup.json.lz4"
+##if [ -e $ADDONS ]
+##then
+##	/usr/bin/cp -v $ADDONS ~/.mozilla/firefox/"$PATH"
+##fi
+#
+#
+#/usr/bin/cat > ~/.mozilla/firefox/$PATH/user.js <<EOL
+#/* user.js
+#* https://github.com/rafaelmardojai/firefox-gnome-theme/
+#*/
+#
+#// Enable customChrome.css
+#//user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+#
+#// Set UI density to normal
+#user_pref("browser.uidensity", 0);
+#
+#// Enable SVG context-propertes
+#user_pref("svg.context-properties.content.enabled", true);
+#
+#// CUSTOM GNOME THEME
+#user_pref("gnomeTheme.hideSingleTab", true);
+#user_pref("gnomeTheme.systemIcons", true);
+#user_pref("gnomeTheme.bookmarksToolbarUnderTabs", false);
+#user_pref("svg.context-properties.content.enabled", true);
+#
+#// CUSTOM
+#
+#user_pref("security.tls.enable_0rtt_data", false); // Faster youtube loading
+#
+#
+#//user_pref("privacy.sanitize.pending", "[{\"id\":\"shutdown\",\"itemsToClear\":[\"cache\"],\"options\":{}}]");
+#//user_pref("privacy.sanitize.sanitizeOnShutdown", true);
+#//user_pref("privacy.clearsitedata.cache.enabled", true);
+#//user_pref("privacy.clearOnShutdown.cache", true);
+#user_pref("browser.cache.disk.enable", true);
+#
+#user_pref("browser.sessionstore.restore_pinned_tabs_on_demand", true);
+#user_pref("network.captive-portal-service.enabled", false);
+#user_pref("browser.shell.checkDefaultBrowser", false);
+#user_pref("extensions.activeThemeID", "default-theme@mozilla.org");
+#
+#// FIREDRAGON
+#user_pref("general.smoothScroll.msdPhysics.enabled", true);
+#// user_pref("mousewheel.system_scroll_override.vertical.factor", 100);
+#// user_pref("mousewheel.min_line_scroll_amount", 3);
+#
+#user_pref("font.name.monospace.x-western", "monospace");
+#user_pref("font.name.sans-serif.x-western", "sans-serif");
+#user_pref("font.name.serif.x-western", "serif");
+#user_pref("font.default.x-western", "sans-serif");
+#user_pref("browser.display.use_document_fonts", 1);
+#
+#
+#user_pref("layers.acceleration.force-enabled", true);
+#user_pref("layers.gpu-process.force-enabled", true);
+#
+#user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", false);
+#
+#user_pref("widget.wayland-dmabuf-vaapi.enabled", true);
+#//user_pref("widget.wayland.vsync.enabled", true);
+#user_pref("widget.wayland-dmabuf-video-textures.enabled", true);
+#user_pref("widget.dmabuf.force-enabled", true);
+#
+#user_pref("gfx.webrender.enabled", true);
+#user_pref("gfx.webrender.all", true);
+#user_pref("gfx.webrender.compositor", true);
+#user_pref("gfx.webrender.compositor.force-enabled", true);
+#user_pref("gfx.font_rendering.graphite.enabled", true);
+#user_pref("gfx.text.subpixel-position.force-enabled", true);
+#
+#user_pref("media.hardware-video-decoding.force-enabled", true);
+#user_pref("media.ffmpeg.dmabuf-textures.enabled", true);
+#user_pref("media.ffmpeg.vaapi-drm-display.enabled", true);
+#user_pref("media.ffmpeg.vaapi.enabled", true);
+#user_pref("media.rdd-ffmpeg.enabled", true);
+#user_pref("media.rdd-process.enabled", false); // false to fix videos blocking
+#user_pref("media.ffvpx.enabled", false);
+#
+#user_pref("browser.tabs.opentabfor.middleclick", false);
+#user_pref("middlemouse.openNewWindow", true);
+#
+#//user_pref("browser.startup.page", 1);
+#user_pref("privacy.sanitize.sanitizeOnShutdown", false); // set this to true to clear on shutdown
+#user_pref("extensions.pocket.enabled", false);
+#
+#user_pref("browser.toolbars.bookmarks.visibility", "newtab");
+#
+#
+#user_pref("privacy.resistFingerprinting", false); // master switch
+#user_pref("privacy.resistFingerprinting.block_mozAddonManager", false); // prevents rfp from breaking AMO
+#user_pref("privacy.resistFingerprinting.letterboxing", false);
+#
+#
+#
+#user_pref("print.more-settings.open", true);
+#user_pref("print.printer_Mozilla_Save_to_PDF.print_bgcolor", false);
+#user_pref("print.printer_Mozilla_Save_to_PDF.print_bgimages", false);
+#user_pref("print.printer_Mozilla_Save_to_PDF.print_orientation", 1);
+#user_pref("print.printer_Mozilla_Save_to_PDF.print_shrink_to_fit", true);
+#user_pref("print_printer", "Mozilla Save to PDF");
+#
+#user_pref("distribution.Garuda.bookmarksProcessed", true);
+#user_pref("distribution.gentoo.bookmarksProcessed", true);
+#
+#user_pref("webgl.enable-debug-renderer-info", false);
+#
+#user_pref("toolkit.telemetry.unified", false);
+#user_pref("toolkit.telemetry.enabled", false); // see [NOTE]
+#user_pref("toolkit.telemetry.server", "localhost");
+#user_pref("toolkit.telemetry.archive.enabled", false);
+#user_pref("toolkit.telemetry.newProfilePing.enabled", false); // [FF55+]
+#user_pref("toolkit.telemetry.shutdownPingSender.enabled", false); // [FF55+]
+#user_pref("toolkit.telemetry.updatePing.enabled", false); // [FF56+]
+#user_pref("toolkit.telemetry.bhrPing.enabled", false); // [FF57+] Background Hang Reporter
+#user_pref("toolkit.telemetry.firstShutdownPing.enabled", false); // [FF57+]
+#user_pref("toolkit.telemetry.coverage.opt-out", true); // [HIDDEN PREF]
+#user_pref("toolkit.telemetry.pioneer-new-studies-available", false);
+#user_pref("toolkit.coverage.opt-out", true); // [FF64+] [HIDDEN PREF]
+#user_pref("toolkit.coverage.endpoint.base", "");
+#user_pref("browser.ping-centre.telemetry", false);
+#
+#user_pref("browser.tabs.drawInTitlebar", false);
+#user_pref("browser.tabs.inTitlebar", 0);
+#user_pref("browser.cache.check_doc_frequency", 0);
+#
+## Wayland fixes
+#
+#user_pref("widget.wayland.vsync.enabled", false);
+#EOL
+#

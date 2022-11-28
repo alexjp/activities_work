@@ -1,0 +1,3 @@
+#!/usr/bin/env dash
+
+qdbus org.kde.ActivityManager /ActivityManager/Activities org.kde.ActivityManager.Activities.ActivityName $(qdbus org.kde.ActivityManager /ActivityManager/Activities CurrentActivity)
