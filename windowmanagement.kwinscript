@@ -1,0 +1,386 @@
+const border = 20;
+const small_border = 10;
+const monitor_width = 2560;
+const monitor_height = 1440;
+const secondary_size = Math.round(monitor_width / 2.5);
+const master_size = monitor_width - secondary_size
+const minor_gap = master_size - secondary_size;
+const vert_middle = Math.round(monitor_height / 2);
+const vert_area = Math.round(monitor_height / 3);
+const horizontal_area = Math.round(monitor_width / 3);
+const horizontal_area_two = horizontal_area * 2;
+// todo: put this in a function that the monitor and areas are calculated per window and from kwin values
+
+const float_windows = [];
+
+workspace.clientAdded.connect(manageWindow);
+workspace.clientRemoved.connect(cleanWindow);
+// workspace.clientAdded.connect((window) => {
+// 	if ((window.moveable && window.resizeable) && ! (window.transient || window.specialWindow)) {
+// 		window.clientFinishUserMovedResized.connect(onMovedAnonymousWindow);
+// 	}
+// });
+
+function manageWindow(window) {
+	if (!window || window.transient || window.specialWindow) return;
+
+		switch (window.activities[0]) {
+			case "923af52d-147b-4f2d-9cb0-85c97c48b65e":
+				switch (String(window.resourceClass)) {
+					case 'org.telegram.desktop':
+					case 'telegramdesktop':
+						workspace.sendClientToScreen(window, 0);
+						makeWindowSecondary(window)
+						window.desktop = 1;
+						break;
+					default:
+						positionAnonymousWindow(window);
+				}
+				break;
+
+			case "24fe03fe-1126-46bf-904b-9c04168b7907":
+				switch (String(window.resourceClass)) {
+					default:
+						positionAnonymousWindow(window);
+				}
+				break;
+
+			case "fa015154-ce94-4c86-8008-e844c2fd66c7":
+				switch (String(window.resourceClass)) {
+					case 'code-oss':
+					case 'code-url-handler':
+						workspace.sendClientToScreen(window, 1);
+						makeWindowMax(window);
+						//workspace.slotWindowMaximize(window);
+						makeWindowSpecialMax(window);
+						window.desktop = 1;
+						break;
+					case 'Logseq':
+					case 'electron':
+						workspace.sendClientToScreen(window, 0);
+						makeWindowSecondary(window);
+						window.desktop = 1;
+						break;
+					case 'chromium':
+					case 'brave-browser':
+						workspace.sendClientToScreen(window, 0);
+						makeWindowMaster(window)
+						window.desktop = 1;
+						break;
+					default:
+						positionAnonymousWindow(window);
+				}
+				break;
+
+			case "5dc75a29-7927-4e8e-b86d-8d46011319bc":
+				switch (String(window.resourceClass)) {
+					case 'signal':
+						workspace.sendClientToScreen(window, 0);
+						makeWindowSecondary(window)
+						window.desktop = 1;
+						break;
+					case 'firefox':
+						workspace.sendClientToScreen(window, 1);
+						makeWindowMaster(window);
+						break;
+					case 'Logseq':
+					case 'electron':
+						workspace.sendClientToScreen(window, 0);
+						makeWindowMaster(window);
+						window.desktop = 1;
+						break;
+					default:
+						positionAnonymousWindow(window);
+				}
+				break;
+
+			case "2843f4f0-8e06-45cb-9769-ffbff3d9df08":
+				switch (String(window.resourceClass)) {
+					case 'io.site.tradingview':
+						workspace.sendClientToScreen(window, 0);
+						makeWindowMax(window);
+						window.desktop = 1;
+						break;
+					case 'io.site.feeds-trading':
+						workspace.sendClientToScreen(window, 1);
+						makeWindowMax(window);
+						window.desktop = 1;
+						break;
+					case 'terminal64.exe':
+						workspace.sendClientToScreen(window, 1);
+						makeWindowSecondary(window);
+						window.desktop = 1;
+						break;
+					case 'motivewave':
+						switch (String(window.caption)) {
+							case 'MotiveWave - Console (3cqgdemo)':
+								workspace.sendClientToScreen(window, 0);
+								makeWindowSpecialMaxAllMonitors(window);
+								window.desktop = 2;
+								break;
+						}
+						break;
+					default:
+						positionAnonymousWindow(window);
+				}
+				break;
+			case "24817bff-05d7-486a-a6d0-322fc462357b":
+				switch (String(window.resourceClass)) {
+					case 'element':
+					case 'Electron':
+						workspace.sendClientToScreen(window, 0);
+						makeWindowSecondary(window);
+						window.desktop = 1;
+						break;
+					default:
+						positionAnonymousWindow(window);
+				}
+				break;
+		}
+
+	window.clientFinishUserMovedResized.connect(onMovedAnonymousWindow);
+}
+
+// On new window not forced positioned
+
+function positionAnonymousWindow(window) {
+	if (window.frameGeometry.width > (master_size + border)) {
+		makeWindowMax(window);
+		return;
+	}
+
+	if (window.frameGeometry.width > (secondary_size + border)) {
+		makeWindowMaster(window);
+		return;
+	}
+
+	makeWindowSecondary(window);
+}
+
+// On moved window
+
+function onMovedAnonymousWindow(window) {
+	area = getArea(window);
+	print(area.x + " -> area.x " + area.width + " -> area.width");
+
+	isFloat = isFloatWindow(window);
+	if (isFloat >= 0) {
+		doPlacementFloat(window, area);
+		return;
+	}
+	doPlacement(window, area, findMiddleWindow(window, area));
+}
+
+
+// Forcing where window should be
+
+function isFloatWindow(window) {
+	// for (i=0; i < float_windows.length; i++ ) {
+	// 	if (float_windows[i] === window.frameId)
+	// 		return i;
+	// }
+	return float_windows.indexOf(String(window));
+}
+
+function cleanWindow(window) {
+	float = isFloatWindow(window);
+	if (float >= 0) {
+		removeWindowSpecialFloat(window, float);
+	}
+}
+
+function toggleFloatWindow(window) {
+	floatIndex = isFloatWindow(window);
+	if (floatIndex === -1)
+		makeWindowSpecialFloat(window);
+	else {
+		removeWindowSpecialFloat(window, floatIndex);
+		positionAnonymousWindow(window);
+	}
+}
+
+function makeWindowSpecialFloat(window, enable) {
+	float_windows.push(String(window));
+	window.keepAbove = true;
+	doPlacementFloat(window, getArea(window));
+}
+
+function removeWindowSpecialFloat(window, index) {
+	window.keepAbove = false;
+	float_windows.splice(index, 1);
+}
+
+function doPlacementFloat(window, area) {
+	monitor_offset = area.x;
+	geometry = { x: window.x - monitor_offset, y: window.y, width: window.width, height: window.height };
+	changed = false;
+	if (geometry.x < border) {
+		geometry.x = border;
+		changed = true;
+	}
+	if (geometry.y < border) {
+		geometry.y = border;
+		changed = true;
+	}
+	if ((geometry.width + (2 * border)) > monitor_width) {
+		geometry.width = monitor_width - (2 * border);
+		geometry.x = border;
+		changed = true;
+	}
+	if ((geometry.height + (2 * border)) > monitor_height) {
+		geometry.height = monitor_height - (2 * border);
+		geometry.y = border;
+		changed = true;
+	}
+	if ((geometry.x + geometry.width + border) > monitor_width) {
+		geometry.x = geometry.x - ((geometry.x + geometry.width + (border)) - monitor_width);
+		changed = true;
+	}
+	if ((geometry.y + geometry.height + border) > monitor_height) {
+		geometry.y = geometry.y - ((geometry.y + geometry.height + (border)) - monitor_height);
+		changed = true;
+	}
+	if (changed) {
+		geometry.x = geometry.x + monitor_offset;
+		window.frameGeometry = geometry;
+	}
+}
+
+function makeWindowSpecialMax(window) {
+	area = workspace.clientArea(KWin.MaximizeArea, window);
+	window.frameGeometry = { x: area.x + small_border, y: area.y + small_border, width: area.width - (small_border * 2), height: area.height - (small_border * 2)}
+}
+
+function makeWindowSpecialMaxAllMonitors(window) {
+	window.frameGeometry = { x:small_border, y: small_border, width: (monitor_width * 2) - (small_border * 2), height: monitor_height - (small_border * 2)}
+}
+
+function makeWindowMax(window) {
+	area = workspace.clientArea(KWin.MaximizeArea, window);
+	if (detectRightMonitor(area)) {
+		geometry = {x: monitor_width + horizontal_area + border, y: vert_area + border};
+	}
+	else {
+		geometry = {x: horizontal_area + border, y: vert_area + border };
+	}
+
+	doPlacement(window, area, geometry);
+}
+function makeWindowMaster(window) {
+	area = workspace.clientArea(KWin.MaximizeArea, window);
+	geometry_x = horizontal_area_two + border;
+	geometry_y = selectVerticalHeight(window, area);
+
+	if (detectRightMonitor(area))
+		geometry_x = monitor_width + border;
+
+	geometry = {x: geometry_x, y: geometry_y};
+	doPlacement(window, area, geometry);
+}
+function makeWindowSecondary(window) {
+	area = workspace.clientArea(KWin.MaximizeArea, window);
+	geometry_x = horizontal_area - border;
+	geometry_y = selectVerticalHeight(window, area);
+
+	if (detectRightMonitor(area))
+		geometry_x = monitor_width + horizontal_area_two + border;
+
+	geometry = {x: geometry_x, y: geometry_y};
+	doPlacement(window, area, geometry);
+}
+
+// Placement of the window based on geometry position
+
+function doPlacement(window, area, geometry) {
+	if (detectRightMonitor(area))
+		geometry = placeWindowHorizontalInverted(window, area, geometry);
+	else
+		geometry = placeWindowHorizontal(window, area, geometry);
+
+	geometry = placeWindowVertical(window, area, geometry);
+	window.frameGeometry = geometry;
+	return;
+}
+
+
+function placeWindowHorizontal(window, area, geometry) {
+	if (geometry.x < horizontal_area) {
+		geometry.x = area.x + border;
+		geometry.width = area.width - (border * 2) - master_size;
+	}
+	else if (geometry.x < horizontal_area_two) {
+		geometry.x = area.x + border + minor_gap;
+		geometry.width = area.width - (border * 2) - minor_gap;
+	}else {
+		geometry.x = area.x + border + secondary_size;
+		geometry.width = area.width - (border * 2) - secondary_size;
+	}
+	return geometry;
+}
+
+
+function placeWindowHorizontalInverted(window, area, geometry) {
+	if ((geometry.x - monitor_width) > horizontal_area_two) {
+		geometry.x = area.x + border + master_size;
+		geometry.width = area.width - (border * 2) - master_size;
+	}
+	else if ((geometry.x - monitor_width) > (horizontal_area)) {
+		geometry.x = area.x + border;
+		geometry.width = area.width - (border * 2) - minor_gap ;
+	}else {
+		geometry.x = area.x + border;
+		geometry.width = area.width - (border * 2) - secondary_size;
+	}
+	return geometry;
+}
+
+function placeWindowVertical(window, area, geometry) {
+	if (geometry.y < vert_area) {
+		geometry.y = area.y + border;
+		geometry.height = area.height - (border * 2) - vert_middle;
+	}
+	else if (geometry.y < (vert_area*2)) {
+		geometry.y = area.y + border;
+		geometry.height = area.height - (border * 2) ;
+	}else {
+		geometry.y = area.y + border + vert_middle;
+		geometry.height = area.height - (border * 2) - vert_middle;
+	}
+	return geometry;1
+}
+
+// Helpers
+
+function selectVerticalHeight(window, area) {
+	if (window.frameGeometry.height < (vert_middle + border)) {
+		position = findMiddleWindow(window, area);
+		return position.y;
+	}
+	return 	vert_area + border;
+}
+
+function getArea(window) {
+	return workspace.clientArea(KWin.MaximizeArea, window);
+}
+
+function findMiddleWindow(window, area) {
+	geometry = {x: (window.frameGeometry.x + (window.frameGeometry.width / 2)), y: (window.frameGeometry.y + (window.frameGeometry.height / 2))};
+	return geometry
+}
+
+function detectRightMonitor(area) {
+	if (area.x >= area.width) {
+		return true;
+	}
+	return false;
+}
+
+registerShortcut("ActivityWindowManagement", "Place windows in default place", "Meta+Shift+Return", function() { workspace.clientList().forEach(manageWindow); });
+
+registerShortcut("makeWindowMax", "Place windows in max", "Meta+Alt+1", function() { makeWindowMax(workspace.activeClient); });
+registerShortcut("makeWindowMaster", "Place windows in master", "Meta+Alt+2", function() { makeWindowMaster(workspace.activeClient); });
+registerShortcut("makeWindowSecondary", "Place windows in secondary", "Meta+Alt+3", function() { makeWindowSecondary(workspace.activeClient); });
+
+registerShortcut("makeWindowSpecialFloat", "Toggle float window mode", "Meta+Ctrl+1", function() { toggleFloatWindow(workspace.activeClient); });
+registerShortcut("makeWindowSpecialMax", "Place windows in special max mode", "Meta+Ctrl+2", function() { makeWindowSpecialMax(workspace.activeClient); });
+registerShortcut("makeWindowSpecialMaxAllMonitors", "Place windows in special all monitors", "Meta+Ctrl+3", function() { makeWindowSpecialMaxAllMonitors(workspace.activeClient); });

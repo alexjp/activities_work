@@ -1,4 +1,4 @@
-#!/usr/bin/env dash
+#!/usr/bin/env bash
 
 overlaylist_kdebin() {	
 	if [ -e "$KDE_ACTIVITIES_BIN_FOLDER"/$1 ]
@@ -18,6 +18,7 @@ overlaylist() {
 }
 
 run_free() {
+
 	for exec in $(which $BIN -a)
 	do
 		if [ $(basename $(readlink -f $exec)) != "activities.workspace" ]
@@ -29,50 +30,20 @@ run_free() {
 	$REALBIN $@
 }
 
-
-BIN="$(basename $0)"
-ACTIVITY=$(activities.id)
-ACTIVITY_NAME=$(activities.name)
-
-
-BASEFOLDER_KDE="$HOME"/.local/share/kactivitymanagerd/activities
-BASEFOLDER_HOME="$HOME"/activities
-
-DIRECTORY="$BASEFOLDER_KDE"/$ACTIVITY
-DIRECTORY_ACTIVITY_NAME="$BASEFOLDER_HOME"/"$ACTIVITY_NAME"
-
-
-KDE_ACTIVITIES_BIN_FOLDER="$HOME"/.config/plasma-workspace/bin
-PLASMA_WORKSPACE="$HOME"/.config/plasma-workspace
-LIST_ACTIVITIES_SYNC_GLOBAL="$HOME"/.config/plasma-workspace/activities.sync.global
-
-ACTIVITY_DISABLE_APPS_FOLDER="$DIRECTORY"/.activities/apps.disabled
-ACTIVITY_LAUNCHER="$DIRECTORY"/.activities/launcher
-#shift
-
-#echo rsync -ax --ignore-existing "$HOME"/.config/plasma-workspace/template/ $DIRECTORY
-#exit 0
-# happy path that should be most common
-if [ ! -e "$DIRECTORY/.activities/skip" ]
-then
-	if [ ! -e "$ACTIVITY_DISABLE_APPS_FOLDER/$BIN" ]
+place_window() {
+	WINDOW_SCRIPT="$DIRECTORY"/.activities/windows.kwinscript
+		
+	if [ -e "$WINDOW_SCRIPT" ]
 	then
-		if [ -e "$ACTIVITY_LAUNCHER" ]
-		then
-			"$ACTIVITY_LAUNCHER" $BIN $@
-			exit 0
-		fi 
-	else
-		run_free $@
-		exit 0
+		activities.windows "$WINDOW_SCRIPT" "$ACTIVITY" &
 	fi
-else
-	run_free $@
-	exit 0
-fi
+}
 
+run_isolated() {
+	"$ACTIVITY_LAUNCHER" $@
+}
 
-
+create_structure() {
 if [ ! -d "$BASEFOLDER_KDE" ]; then
 	mkdir -p "$BASEFOLDER_KDE"
 fi
@@ -85,9 +56,57 @@ fi
 if [ ! -d "$ACTIVITY_DISABLE_APPS_FOLDER" ]; then
 	mkdir -p "$ACTIVITY_DISABLE_APPS_FOLDER"
 fi
-if [ ! -d "$DIRECTORY_ACTIVITY_NAME" ]; then
-	ln -s $DIRECTORY $DIRECTORY_ACTIVITY_NAME
+if [ ! -d "$DIRECTORY"/.activities/started ]; then
+	mkdir -p "$DIRECTORY"/.activities/started
 fi
+if [ ! -d "$DIRECTORY_ACTIVITY_NAME" ]; then
+	ln -s ../.activities/$ACTIVITY $DIRECTORY_ACTIVITY_NAME
+fi
+}
+
+BIN="$(basename $0)"
+ACTIVITY=$(activities.id)
+ACTIVITY_NAME=$(activities.name)
+
+BASEFOLDER_KDE="$HOME"/.local/share/kactivitymanagerd/activities
+BASEFOLDER_HOME="$HOME"/activities
+
+DIRECTORY="$BASEFOLDER_KDE"/$ACTIVITY
+DIRECTORY_ACTIVITY_NAME="$BASEFOLDER_HOME"/"$ACTIVITY_NAME"
+
+
+KDE_ACTIVITIES_BIN_FOLDER="$HOME"/.config/plasma-workspace/bin
+PLASMA_WORKSPACE="$HOME"/.config/plasma-workspace
+LIST_ACTIVITIES_SYNC_GLOBAL="$HOME"/.config/plasma-workspace/activities.sync.global
+
+ACTIVITY_APPS_FOLDER="$DIRECTORY"/.activities/apps
+ACTIVITY_DISABLE_APPS_FOLDER="$DIRECTORY"/.activities/apps.disabled
+ACTIVITY_LAUNCHER="$DIRECTORY"/.activities/launcher
+#shift
+
+#echo rsync -ax --ignore-existing "$HOME"/.config/plasma-workspace/template/ $DIRECTORY
+#exit 0
+# happy path that should be most common
+
+if [ $BIN = "activities.workspace" ]
+then
+  create_structure
+  exit 0
+fi
+
+if [ ! -e "$DIRECTORY/.activities/skip" ] && [ ! -e "$ACTIVITY_DISABLE_APPS_FOLDER/$BIN" ]
+then
+	if [ -e "$ACTIVITY_LAUNCHER" ]
+	then
+		run_isolated $BIN $@
+		exit 0
+	fi 
+else
+	run_free $@
+	exit 0
+fi
+
+create_structure
 
 if [ ! -e "$DIRECTORY/.activities/skip" ]
 then
@@ -98,6 +117,7 @@ then
 				OVERLAY=""
 				overlaylist_kdebin "activities.id"
 				overlaylist_kdebin "activities.name"
+				overlaylist_kdebin "activities.windows"
 				overlaylist_kdebin "activities.create_firefox"
 				overlaylist_kdebin "activities.run_default"
 				overlaylist $LIST_ACTIVITIES_SYNC_GLOBAL
@@ -108,6 +128,10 @@ then
 						overlaylist $app
 					fi
 				done
+				for app in "$ACTIVITY_APPS_FOLDER"/*
+				do
+					overlaylist $app
+				done
 				cd
 					echo -e "bwrap --dev-bind / / \\\\\n"\
 					"--bind "$DIRECTORY" "$HOME" \\\\\n"\
@@ -116,7 +140,7 @@ then
 					'$@' > "$ACTIVITY_LAUNCHER"
 					chmod +x "$ACTIVITY_LAUNCHER"
 			fi
-			"$ACTIVITY_LAUNCHER" $BIN $@
+			run_isolated $BIN $@
 			exit 0
 	fi
 fi

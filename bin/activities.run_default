@@ -1,6 +1,7 @@
 #!/usr/bin/env dash
 
-FOLDER="$HOME"/.activities/$(activities.id)/started"
+ACTIVITY_ID=$(activities.id)
+FOLDER="$HOME"/.local/share/kactivitymanagerd/activities/$ACTIVITY_ID/.activities/started
 SUMMARY="launching activity applications..."
 MESSAGE=""
 
@@ -12,10 +13,8 @@ fi
 
 for x in $FOLDER/*.sh
 do
-    echo looping: $x
-    if [ -x "$x" ]
-    then
-        echo exists: $x
+#    echo looping: $x
+#        echo exists: $x
         if ! systemctl --user list-units | grep $x -s | grep active -q 
         then
             echo running: systemd-run --user $x
@@ -26,11 +25,10 @@ do
             sleep 1s
         else
             MESSAGE="$MESSAGE \n Skipping: $(basename $x)"
-            echo skipping: systemd-run --user $x
-        fi
+#            echo skipping: systemd-run --user $x
     fi
 done
-echo $MESSAGE
+#echo $MESSAGE
 if [ ! -z "$MESSAGE" ]
 then
     notify-send "$SUMMARY" "$MESSAGE" 

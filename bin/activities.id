@@ -1,3 +1,4 @@
 #!/usr/bin/env dash
 
 qdbus org.kde.ActivityManager /ActivityManager/Activities CurrentActivity
+#dbus-send --print-reply --print-reply=literal --dest=org.kde.ActivityManager /ActivityManager/Activities org.kde.ActivityManager.Activities.CurrentActivity

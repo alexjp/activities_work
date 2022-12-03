@@ -1,2 +1,5 @@
-.logseq
+.logseq/plugins
+.logseq/settings
+.logseq/config
+.logseq/preferences.json
 .local/bin/logseq
