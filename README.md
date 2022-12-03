@@ -1,6 +1,19 @@
 # File isolation on activities
 
 
+## Goals
+ - Enable some activities to have specific home folder isolation
+ - Enable specific apps to have home folder isolation
+ - Enable activities to opt in or opt out of home folder isolation
+ - Sharing of desktop settings like themes, icons, cursors, etc
+ - Sharing of specific applications configuration files
+ - Have defined default apps per activities (isolated or not) to be easily ran
+ - Track running of default apps, so to not start already running
+ - Ability to reach real home folder in case of isolated
+ - Have a default initial stage of home folder (start with files that will not be synched if changed)
+
+
+
 ## Using bwrap to allow file isolation
 
  - Using bwrap to isolate an app to a home beloging to the activity
