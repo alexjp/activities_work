@@ -1,9 +1,9 @@
-const border = 20;
-const small_border = 10;
+const border = 10;
+const small_border = 5;
 const monitor_width = 2560;
 const monitor_height = 1440;
-const secondary_size = Math.round(monitor_width / 2.5);
-const master_size = monitor_width - secondary_size
+const master_size = Math.round(monitor_width * 0.618)
+const secondary_size = Math.round(monitor_width - master_size);
 const minor_gap = master_size - secondary_size;
 const vert_middle = Math.round(monitor_height / 2);
 const vert_area = Math.round(monitor_height / 3);
@@ -130,6 +130,11 @@ function manageWindow(window) {
 					case 'Electron':
 						workspace.sendClientToScreen(window, 0);
 						makeWindowSecondary(window);
+						window.desktop = 1;
+						break;
+					case 'io.site.kde':
+						workspace.sendClientToScreen(window, 1);
+						makeWindowMaster(window);
 						window.desktop = 1;
 						break;
 					default:
