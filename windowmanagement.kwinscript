@@ -2,9 +2,10 @@ const border = 10;
 const small_border = 5;
 const monitor_width = 2560;
 const monitor_height = 1440;
-const master_size = Math.round(monitor_width * 0.618)
+const master_size = Math.round(monitor_width * 0.62)
 const secondary_size = Math.round(monitor_width - master_size);
-const minor_gap = master_size - secondary_size;
+const minor_gap = Math.round(monitor_width * 0.24)
+//const minor_gap = master_size - secondary_size;
 const vert_middle = Math.round(monitor_height / 2);
 const vert_area = Math.round(monitor_height / 3);
 const horizontal_area = Math.round(monitor_width / 3);
@@ -133,6 +134,11 @@ function manageWindow(window) {
 						window.desktop = 1;
 						break;
 					case 'io.site.kde':
+						workspace.sendClientToScreen(window, 1);
+						makeWindowSecondary(window);
+						window.desktop = 1;
+						break;
+					case 'io.site.feeds-kde':
 						workspace.sendClientToScreen(window, 1);
 						makeWindowMaster(window);
 						window.desktop = 1;
