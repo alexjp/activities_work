@@ -30,16 +30,8 @@ run_free() {
 	$REALBIN $@
 }
 
-place_window() {
-	WINDOW_SCRIPT="$DIRECTORY"/.activities/windows.kwinscript
-		
-	if [ -e "$WINDOW_SCRIPT" ]
-	then
-		activities.windows "$WINDOW_SCRIPT" "$ACTIVITY" &
-	fi
-}
-
 run_isolated() {
+	export PATH=$HOME/.local.bin:/tmp/home/.local/bin:$PATH
 	"$ACTIVITY_LAUNCHER" $@
 }
 
@@ -64,10 +56,19 @@ if [ ! -d "$DIRECTORY_ACTIVITY_NAME" ]; then
 fi
 }
 
+## START
+
 BIN="$(basename $0)"
 ACTIVITY=$(activities.id)
-ACTIVITY_NAME=$(activities.name)
 
+if [ $ACTIVITY = -1 ]
+then
+	#echo "not in KDE"
+	run_free $@
+	exit 0
+fi
+
+ACTIVITY_NAME=$(activities.name)
 BASEFOLDER_KDE="$HOME"/.local/share/kactivitymanagerd/activities
 BASEFOLDER_HOME="$HOME"/activities
 
@@ -117,7 +118,6 @@ then
 				OVERLAY=""
 				overlaylist_kdebin "activities.id"
 				overlaylist_kdebin "activities.name"
-				overlaylist_kdebin "activities.windows"
 				overlaylist_kdebin "activities.create_firefox"
 				overlaylist_kdebin "activities.run_default"
 				overlaylist $LIST_ACTIVITIES_SYNC_GLOBAL

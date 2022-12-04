@@ -1,4 +1,18 @@
 #!/usr/bin/env dash
 
-qdbus org.kde.ActivityManager /ActivityManager/Activities CurrentActivity
+
+if [ ! -z $XDG_SESSION_DESKTOP ] 
+then
+	if [ $XDG_SESSION_DESKTOP = "KDE" ]
+	then
+    #echo "KDE : $XDG_SESSION_DESKTOP"
+    qdbus org.kde.ActivityManager /ActivityManager/Activities CurrentActivity
+    exit 0
+	fi
+fi
+
+echo -1
+exit 1
+
+#qdbus org.kde.ActivityManager /ActivityManager/Activities CurrentActivity
 #dbus-send --print-reply --print-reply=literal --dest=org.kde.ActivityManager /ActivityManager/Activities org.kde.ActivityManager.Activities.CurrentActivity

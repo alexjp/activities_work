@@ -1,3 +1,9 @@
 #!/usr/bin/env dash
 
+ACTIVITY=$(activities.id)
+
+if [ $ACTIVITY = "-1" ]; then 
+  exit 1 
+fi
+
 qdbus org.kde.ActivityManager /ActivityManager/Activities org.kde.ActivityManager.Activities.ActivityName $(qdbus org.kde.ActivityManager /ActivityManager/Activities CurrentActivity)
