@@ -2,5 +2,4 @@
 .logseq/settings
 .logseq/config
 .logseq/preferences.json
-.local/bin/logseq
 .logseq.template
