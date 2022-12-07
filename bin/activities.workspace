@@ -27,12 +27,12 @@ run_free() {
 			break
 		fi
 	done
-	$REALBIN $@
+	$REALBIN "$@"
 }
 
 run_isolated() {
-	export PATH=$HOME/.local.bin:/tmp/home/.local/bin:$PATH
-	"$ACTIVITY_LAUNCHER" $@
+	export PATH=$HOME/.local.bin:$HOME/Home/.local/bin:$PATH
+	"$ACTIVITY_LAUNCHER" "$@"
 }
 
 create_structure() {
@@ -64,7 +64,7 @@ ACTIVITY=$(activities.id)
 if [ $ACTIVITY = -1 ]
 then
 	#echo "not in KDE"
-	run_free $@
+	run_free "$@"
 	exit 0
 fi
 
@@ -99,11 +99,11 @@ if [ ! -e "$DIRECTORY/.activities/skip" ] && [ ! -e "$ACTIVITY_DISABLE_APPS_FOLD
 then
 	if [ -e "$ACTIVITY_LAUNCHER" ]
 	then
-		run_isolated $BIN $@
+		run_isolated $BIN "$@"
 		exit 0
 	fi 
 else
-	run_free $@
+	run_free "$@"
 	exit 0
 fi
 
@@ -133,14 +133,14 @@ then
 					overlaylist $app
 				done
 				cd
-					echo -e "bwrap --dev-bind / / \\\\\n"\
+					echo -e "bwrap --dev-bind / / --tmpfs /tmp \\\\\n"\
 					"--bind "$DIRECTORY" "$HOME" \\\\\n"\
-					"--bind "$HOME" /tmp/home \\\\\n"\
+					"--bind "$HOME" /home/alex/Home \\\\\n"\
 					"$OVERLAY" \
-					'$@' > "$ACTIVITY_LAUNCHER"
+					"$@" > "$ACTIVITY_LAUNCHER"
 					chmod +x "$ACTIVITY_LAUNCHER"
 			fi
-			run_isolated $BIN $@
+			run_isolated $BIN "$@"
 			exit 0
 	fi
 fi
