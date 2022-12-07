@@ -137,7 +137,7 @@ then
 					"--bind "$DIRECTORY" "$HOME" \\\\\n"\
 					"--bind "$HOME" /home/alex/Home \\\\\n"\
 					"$OVERLAY" \
-					"$@" > "$ACTIVITY_LAUNCHER"
+					'$@' > "$ACTIVITY_LAUNCHER"
 					chmod +x "$ACTIVITY_LAUNCHER"
 			fi
 			run_isolated $BIN "$@"
