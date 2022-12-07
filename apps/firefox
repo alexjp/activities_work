@@ -1,3 +1,4 @@
 .mozilla/firefox/set_chrome_theme.fish
 .mozilla/firefox/profile_restore.fish
 .mozilla/firefox/chrome
+adguard_settings.json

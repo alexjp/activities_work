@@ -2,6 +2,7 @@
 .config/fish/conf.d/00-env.fish
 .config/fish/conf.d/10-systemd.fish
 .config/fish/conf.d/20-utils.fish
+.config/fish/conf.d/30-logseq.fish
 .config/fish/conf.d/90-zoxide.fish
 .config/fish/conf.d/90-starship.fish
 .config/fish/conf.d/90-chromium.fish

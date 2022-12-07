@@ -7,3 +7,5 @@
 .config/gtk-3.0
 .config/gtk-4.0
 .config/dconf
+.config/user-dirs.dirs
+.config/user-dirs.locale
