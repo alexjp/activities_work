@@ -1,59 +1,65 @@
 #!/usr/bin/env bash
 
 overlaylist_kdebin() {	
-	if [ -e "$KDE_ACTIVITIES_BIN_FOLDER"/$1 ]
-	then		
-		OVERLAY=$(echo "${OVERLAY} --bind-try \"$KDE_ACTIVITIES_BIN_FOLDER/$1\" \"$HOME/.local/bin/$1\" \\\\\n")
-	fi	
+  if [ -e "$KDE_ACTIVITIES_BIN_FOLDER"/$1 ]
+  then
+    OVERLAY=$(echo "${OVERLAY} --bind-try \"$KDE_ACTIVITIES_BIN_FOLDER/$1\" \"$HOME/.local/bin/$1\" \\\\\n")
+  fi	
 }
 
 overlaylist() {
-	if [ -e "$1" ]
-	then
-		while read x
-		do
-			OVERLAY=$(echo "${OVERLAY} --bind-try \"$HOME/$x\" \"$HOME/$x\" \\\\\n")
-		done < "$1"
-	fi	
+  if [ -e "$1" ]
+  then
+    while read x
+    do
+      if [ ! -z $x ]
+      then
+        #if [ -e $HOME/$x ] || [ -d $HOME/$x ]
+        #then
+        OVERLAY=$(echo "${OVERLAY} --bind-try \"$HOME/$x\" \"$HOME/$x\" \\\\\n")
+        #fi
+      fi
+    done < "$1"
+  fi	
 }
 
 run_free() {
 
-	for exec in $(which $BIN -a)
-	do
-		if [ $(basename $(readlink -f $exec)) != "activities.workspace" ]
-		then
-			REALBIN="$exec"
-			break
-		fi
-	done
-	$REALBIN "$@"
+  for exec in $(which $BIN -a)
+  do
+    if [ $(basename $(readlink -f $exec)) != "activities.workspace" ]
+    then
+      REALBIN="$exec"
+      break
+    fi
+  done
+  $REALBIN "$@"
 }
 
 run_isolated() {
-	export PATH=$HOME/.local.bin:$HOME/Home/.local/bin:$PATH
-	"$ACTIVITY_LAUNCHER" "$@"
+  export PATH=$HOME/.local.bin:$HOME/Home/.local/bin:$PATH
+  "$ACTIVITY_LAUNCHER" "$@"
 }
 
 create_structure() {
-if [ ! -d "$BASEFOLDER_KDE" ]; then
-	mkdir -p "$BASEFOLDER_KDE"
-fi
-if [ ! -d "$BASEFOLDER_HOME" ]; then
-	mkdir -p "$BASEFOLDER_HOME"
-fi
-if [ ! -d "$DIRECTORY" ]; then
-	mkdir -p "$DIRECTORY"
-fi
-if [ ! -d "$ACTIVITY_DISABLE_APPS_FOLDER" ]; then
-	mkdir -p "$ACTIVITY_DISABLE_APPS_FOLDER"
-fi
-if [ ! -d "$DIRECTORY"/.activities/started ]; then
-	mkdir -p "$DIRECTORY"/.activities/started
-fi
-if [ ! -d "$DIRECTORY_ACTIVITY_NAME" ]; then
-	ln -s ../.activities/$ACTIVITY $DIRECTORY_ACTIVITY_NAME
-fi
+  if [ ! -d "$BASEFOLDER_KDE" ]; then
+    mkdir -p "$BASEFOLDER_KDE"
+  fi
+  if [ ! -d "$BASEFOLDER_HOME" ]; then
+    mkdir -p "$BASEFOLDER_HOME"
+  fi
+  if [ ! -d "$DIRECTORY" ]; then
+    mkdir -p "$DIRECTORY"
+  fi
+  if [ ! -d "$ACTIVITY_DISABLE_APPS_FOLDER" ]; then
+    mkdir -p "$ACTIVITY_DISABLE_APPS_FOLDER"
+  fi
+  if [ ! -d "$DIRECTORY"/.activities/started ]; then
+    mkdir -p "$DIRECTORY"/.activities/started
+  fi
+  if [ ! -d "$DIRECTORY_ACTIVITY_NAME" ]; then
+    ln -s ../.activities/$ACTIVITY $DIRECTORY_ACTIVITY_NAME
+  fi
 }
 
 ## START
@@ -63,9 +69,9 @@ ACTIVITY=$(activities.id)
 
 if [ $ACTIVITY = -1 ]
 then
-	#echo "not in KDE"
-	run_free "$@"
-	exit 0
+  #echo "not in KDE"
+  run_free "$@"
+  exit 0
 fi
 
 ACTIVITY_NAME=$(activities.name)
@@ -94,55 +100,66 @@ then
   create_structure
   exit 0
 fi
-
 if [ ! -e "$DIRECTORY/.activities/skip" ] && [ ! -e "$ACTIVITY_DISABLE_APPS_FOLDER/$BIN" ]
 then
-	if [ -e "$ACTIVITY_LAUNCHER" ]
-	then
-		run_isolated $BIN "$@"
-		exit 0
-	fi 
+  if [ -e "$ACTIVITY_LAUNCHER" ]
+  then
+    run_isolated $BIN "$@"
+    exit 0
+  fi 
 else
-	run_free "$@"
-	exit 0
+  run_free "$@"
+  exit 0
 fi
 
 create_structure
-
 if [ ! -e "$DIRECTORY/.activities/skip" ]
 then
-		if [ ! -e "$ACTIVITY_DISABLE_APPS_FOLDER"/"$BIN" ]
-		then
-			if [ ! -e "$ACTIVITY_LAUNCHER" ]
-			then
-				OVERLAY=""
-				overlaylist_kdebin "activities.id"
-				overlaylist_kdebin "activities.name"
-				overlaylist_kdebin "activities.create_firefox"
-				overlaylist_kdebin "activities.run_default"
-				overlaylist $LIST_ACTIVITIES_SYNC_GLOBAL
-				for app in "$PLASMA_WORKSPACE"/apps/*
-				do
-					if [ ! -e "$ACTIVITY_DISABLE_APPS_FOLDER"/"$app" ]
-					then
-						overlaylist $app
-					fi
-				done
-				for app in "$ACTIVITY_APPS_FOLDER"/*
-				do
-					overlaylist $app
-				done
-				cd
-					echo -e "bwrap --dev-bind / / --tmpfs /tmp \\\\\n"\
-					"--bind "$DIRECTORY" "$HOME" \\\\\n"\
-					"--bind "$HOME" /home/alex/Home \\\\\n"\
-					"$OVERLAY" \
-					'$@' > "$ACTIVITY_LAUNCHER"
-					chmod +x "$ACTIVITY_LAUNCHER"
-			fi
-			run_isolated $BIN "$@"
-			exit 0
-	fi
+  if [ ! -e "$ACTIVITY_DISABLE_APPS_FOLDER"/"$BIN" ]
+  then
+    if [ ! -e "$ACTIVITY_LAUNCHER" ]
+    then
+      if [ -e "$DIRECTORY"/.activities/home.symlink_ ]
+      then
+        cd
+        echo -e "#!/usr/bin/env dash" > "$ACTIVITY_LAUNCHER"
+        echo -e "export HOME=$DIRECTORY" >> "$ACTIVITY_LAUNCHER"
+        echo -e '$@' >> "$ACTIVITY_LAUNCHER"
+        chmod +x "$ACTIVITY_LAUNCHER"
+      else
+        OVERLAY=""
+        overlaylist_kdebin "activities.id"
+        overlaylist_kdebin "activities.name"
+        overlaylist_kdebin "activities.create_firefox"
+        overlaylist_kdebin "activities.run_default"
+        overlaylist_kdebin "activities.link"
+        overlaylist_kdebin "activities.hostid"
+        #overlaylist $LIST_ACTIVITIES_SYNC_GLOBAL
+        #for app in "$PLASMA_WORKSPACE"/apps/*
+        #do
+        #  if [ ! -e "$ACTIVITY_DISABLE_APPS_FOLDER"/"$app" ]
+        #  then
+        #    overlaylist $app
+        #  fi
+        #done
+        #for app in "$ACTIVITY_APPS_FOLDER"/*
+        #do
+        #  overlaylist $app
+        #done
+        cd
+        # --tmpfs /tmp
+        echo -e "bwrap --dev-bind / / \\\\\n"\
+          "--bind "$DIRECTORY" "$HOME" \\\\\n"\
+          "--bind "$HOME" "$HOME"/Home \\\\\n"\
+          "$OVERLAY" \
+          '$@' > "$ACTIVITY_LAUNCHER"
+
+        chmod +x "$ACTIVITY_LAUNCHER"
+      fi
+    fi
+    run_isolated $BIN "$@"
+    exit 0
+  fi
 fi
 
 run_free

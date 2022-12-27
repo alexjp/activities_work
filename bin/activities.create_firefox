@@ -19,12 +19,12 @@ fish set_chrome_theme.fish
 #PATH=$(grep $PROFILE ~/.mozilla/firefox/profiles.ini | grep Path | cut -d"=" -f2)
 #echo ~/.mozilla/firefox/"$PATH"/user.js
 #
-#SEARCH="/home/alex/.home/.mozilla/search.json.mozlz4"
+#SEARCH="$HOME/.home/.mozilla/search.json.mozlz4"
 #if [ -e $SEARCH ]
 #then
 #	/usr/bin/cp -v $SEARCH ~/.mozilla/firefox/"$PATH"
 #fi
-##ADDONS="/home/alex/.home/.mozilla/addonStartup.json.lz4"
+##ADDONS="$HOME/.home/.mozilla/addonStartup.json.lz4"
 ##if [ -e $ADDONS ]
 ##then
 ##	/usr/bin/cp -v $ADDONS ~/.mozilla/firefox/"$PATH"

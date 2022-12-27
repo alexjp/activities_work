@@ -1,0 +1,29 @@
+#!/usr/bin/env fish
+
+if test ! -e Home
+  echo "in the wrong place"
+  exit 1
+end
+
+if test ! -e .backups
+  echo "Making .backups dir for backups"
+  mkdir .backups
+end
+
+for x in (cat "$HOME"/Home/.config/plasma-workspace/activities.sync.global "$HOME"/Home/.config/plasma-workspace/apps/*)
+	if test -e $x
+		if test -L $x
+      rm $x
+    else
+      echo "backing up: $x"
+      mv $x .backups
+    end
+	end
+	if test -e "$HOME"/Home/$x
+	    # skip using relative... it will reference the real destination, if the destination is a symlink
+		#ln -s -r -f "$HOME"/Home/$x $x
+		ln -s -f "$HOME"/Home/$x $x
+	else
+		echo "Skiping, does not exist: $x"
+	end
+end
