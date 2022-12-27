@@ -47,4 +47,9 @@
 	
 
 
+## Instalation
 
+- ### Copy/Git clone files into ~/.config/plasma-workspace
+- ### Log out and login again, so that plasma picks up the PATH change on ~/.config/plasma-workspace/env/10-localbin.sh
+- ### Adapt to your needs, I am not really doing anything special or magic
+- ### More info: https://wiki.archlinux.org/title/Bubblewrap and https://wiki.archlinux.org/title/Bubblewrap/Examples
